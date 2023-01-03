@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 
+
 # Identify pixels above the threshold
 # Threshold of RGB > 160 does a nice job of identifying ground pixels only
 def color_thresh(img, above_rgb_thresh=(160, 160, 160), below_rgb_thresh=(255, 255, 225)):
@@ -83,6 +84,27 @@ def perspect_transform(img, src, dst):
     return warped
 
 
+
+def gaussian_filter(image, kernel_size, sigma):
+    # Create a 1D Gaussian kernel
+    kernel = cv2.getGaussianKernel(kernel_size, sigma)
+    # Convert the 1D kernel to a 2D kernel
+    kernel = kernel * kernel.T
+    # Pad the image to ensure that the kernel can be centered on each pixel
+    image_padded = cv2.copyMakeBorder(image, kernel_size // 2, kernel_size // 2, kernel_size // 2, kernel_size // 2, cv2.BORDER_CONSTANT, value=0)
+    # Create an empty image to store the output
+    output = np.zeros_like(image)
+    # Convolve the image with the kernel
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            # Extract a region of the padded image centered on the current pixel
+            region = image_padded[i:i+kernel_size, j:j+kernel_size]
+            # Multiply the region by the kernel and sum the result
+            output[i, j] = (kernel * region).sum()
+    return output
+
+
+
 # Apply the above functions in succession and update the Rover state accordingly
 def perception_step(Rover):
 
@@ -93,10 +115,10 @@ def perception_step(Rover):
         Rover.perception_count = 0
 
     image = Rover.img
-    dst_size = 3 
+    dst_size = 5
     # Set a bottom offset to account for the fact that the bottom of the image 
     # is not the position of the rover but a bit in front of it
-    bottom_offset = 5
+    bottom_offset = 6
     src = np.float32([[14, 140], [301 ,140],[200, 96], [118, 96]])
     dst = np.float32([[image.shape[1]/2 - dst_size, image.shape[0] - bottom_offset],
                   [image.shape[1]/2 + dst_size, image.shape[0] - bottom_offset],
@@ -105,10 +127,9 @@ def perception_step(Rover):
                   ])
     
     map_view = perspect_transform(Rover.img, src, dst)
-
+    map_view = cv2.GaussianBlur(map_view,(31,31),0)
     # middle between brightest sky and darkest ground from sample image
     navigable_thresholds = (160, 160, 160);
-    #navigable_thresholds = (190, 178, 167);
 
     navigable = color_thresh(map_view, navigable_thresholds)
 
@@ -143,9 +164,9 @@ def perception_step(Rover):
 
     # Clear out low quality nav pixles
     # Delete pixels less than the mean over three
-    if(Rover.perception_count % 200 == 0):
+    if(Rover.perception_count % 100 == 0):
         nav_pix = Rover.worldmap[:,:,2] > 0
-        lowqual_pix = Rover.worldmap[:,:,2] < np.mean(Rover.worldmap[nav_pix, 2]) / 4
+        lowqual_pix = Rover.worldmap[:,:,2] < np.mean(Rover.worldmap[nav_pix, 2]) / 8
         Rover.worldmap[lowqual_pix, 2] = 0
 
     dists, angles = to_polar_coords(nav_xpix, nav_ypix)

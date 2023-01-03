@@ -12,9 +12,9 @@ def decision_step(Rover):
 # Once all 6 rocks are detected keep our heading to the starting point within 90 degrees of actual heading
 
     Rover.left_samp_angles = np.where(Rover.samp_angles * 180/np.pi > -10)[0]
-
+    
     # Once we are done we need to get back to the starting position
-    if Rover.samples_collected == 6:
+    if Rover.samples_collected >= 5:
         print("GO TO START")
         dist_start = np.sqrt((Rover.pos[0] - Rover.start_pos[0])**2 + (Rover.pos[1] - Rover.start_pos[1])**2)
         # Make sure we are heading in right general direction
@@ -78,7 +78,7 @@ def decision_step(Rover):
     if Rover.mode == 'stuck':
         if Rover.stuck_mode == 'forward':
             print("Stuck Forward")
-            Rover.throttle = 1
+            Rover.throttle = 1.5
             #Rover.steer = 0
             Rover.stuck_counter += 1
             if Rover.stuck_counter > 45:
@@ -109,6 +109,8 @@ def decision_step(Rover):
         Rover.mode = 'stuck'
         Rover.stuck_mode = 'forward'
         Rover.stuck_counter = 0
+        
+
 
     # Get the left half of nav angles to wall crawl
     Rover.nav_angles = np.sort(Rover.nav_angles)[-int(len(Rover.nav_angles)/2):]
