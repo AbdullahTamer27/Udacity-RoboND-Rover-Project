@@ -115,7 +115,7 @@ def perception_step(Rover):
         Rover.frame_count = 0
 
     image = Rover.img
-    dst_size = 4
+    dst_size = 5
     # Set a bottom offset to account for the fact that the bottom of the image 
     bottom_offset = 6
     src = np.float32([[14, 140], [301 ,140],[200, 96], [118, 96]])
