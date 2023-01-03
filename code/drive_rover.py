@@ -78,7 +78,7 @@ class RoverState():
         self.picking_up = 0 # Will be set to telemetry value data["picking_up"]
         self.send_pickup = False # Set to True to trigger rock pickup
         self.start_pos = None
-        self.perception_count = 0;
+        self.frame_count = 0;
         self.samp_angles = 0;
         self.stuck_counter = 0;
         self.looping = 0

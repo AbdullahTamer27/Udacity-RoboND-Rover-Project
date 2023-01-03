@@ -6,7 +6,6 @@ import numpy as np
 def decision_step(Rover):
 
 # Keep track of starting point
-# When we detect an obstacle make a note of our yaw and return to that yaw after pickup
 # When we detect we are stuck < 0.5 m/s try full throtle for 3 seconds or till we are above 1.0 m/s
 # If we continue to be stuck try rotating our yaw to the right by 30 degrees for 3 seconds
 # Once all 6 rocks are detected keep our heading to the starting point within 90 degrees of actual heading
@@ -32,7 +31,7 @@ def decision_step(Rover):
 
     # If we are picking_up a rock make a note of it 1 time
     if Rover.picking_up == 1:
-        print("PU")
+        print("Picking Up")
         if Rover.collecting == False:
             Rover.collecting = True
             Rover.samples_collected += 1
@@ -50,7 +49,8 @@ def decision_step(Rover):
             Rover.send_pickup = True
         return Rover
 
-    # If we are driving in a circle try to brake out by turning other way
+    # If we are driving in a circle try to brake out by turning other way 
+    # Not working properly
     if Rover.mode == 'looping':
         print("Stopping looping")
         Rover.throttle = 0
@@ -74,7 +74,7 @@ def decision_step(Rover):
 
     print(Rover.left_count)
 
-    # If we are stuck try full throttle, they try rotating a bit to the right
+    # If we are stuck try full throttle, they try rotating
     if Rover.mode == 'stuck':
         if Rover.stuck_mode == 'forward':
             print("Stuck Forward")
